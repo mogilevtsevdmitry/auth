@@ -25,7 +25,7 @@ model User {
 model Token {
   token     String   @unique
   exp       DateTime
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   userAgent String   @map("user_agent")
 
