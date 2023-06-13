@@ -1,6 +1,6 @@
-import { find, throwError } from 'rxjs';
-import { Catch, ArgumentsHost, BadGatewayException, ExceptionFilter, ConflictException, NotFoundException } from '@nestjs/common';
+import { ArgumentsHost, BadGatewayException, Catch, ConflictException, ExceptionFilter } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { throwError } from 'rxjs';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
