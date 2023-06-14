@@ -20,6 +20,7 @@ import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
 import { Tokens } from './interfaces';
 import { GoogleAuthGuard } from './guargs/google.guard';
+import { YandexAuthGuard } from './guargs/yandex.guard';
 
 const REFRESH_TOKEN = 'refreshtoken';
 
@@ -81,6 +82,18 @@ export class AuthController {
     @UseGuards(GoogleAuthGuard)
     @Get('google/callback')
     googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+        res.redirect(`http://localhost:3000/api/auth/success?token=${req.user['accessToken']}`);
+    }
+
+    @UseGuards(YandexAuthGuard)
+    @Get('yandex')
+    yandexAuth(@Req() req: Request) {
+        // return req;
+    }
+
+    @UseGuards(YandexAuthGuard)
+    @Get('yandex/callback')
+    yandexAuthCallback(@Req() req: Request, @Res() res: Response) {
         res.redirect(`http://localhost:3000/api/auth/success?token=${req.user['accessToken']}`);
     }
 
