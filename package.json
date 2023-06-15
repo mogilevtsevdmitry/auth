@@ -22,6 +22,7 @@
     "docker:down": "docker-compose -f ./docker/postgres/docker-compose.yml down"
   },
   "dependencies": {
+    "@nestjs/axios": "^2.0.0",
     "@nestjs/cache-manager": "^1.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.3",
@@ -30,6 +31,7 @@
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
     "@prisma/client": "^4.15.0",
+    "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
     "cache-manager": "^5.2.2",
     "class-transformer": "^0.5.1",

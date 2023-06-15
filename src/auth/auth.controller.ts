@@ -1,4 +1,5 @@
 import { Cookie, Public, UserAgent } from '@common/decorators';
+import { HttpService } from '@nestjs/axios';
 import {
     BadRequestException,
     Body,
@@ -7,6 +8,7 @@ import {
     Get,
     HttpStatus,
     Post,
+    Query,
     Req,
     Res,
     UnauthorizedException,
@@ -16,18 +18,25 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { UserResponse } from '@user/responses';
 import { Request, Response } from 'express';
+import { map, mergeMap, tap } from 'rxjs';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
+import { GoogleGuard } from './guargs/google.guard';
 import { Tokens } from './interfaces';
-import { GoogleAuthGuard } from './guargs/google.guard';
-import { YandexAuthGuard } from './guargs/yandex.guard';
+import { handleTimeoutAndErrors } from '@common/helpers';
+import { YandexGuard } from './guargs/yandex.guard';
+import { Provider } from '@prisma/client';
 
 const REFRESH_TOKEN = 'refreshtoken';
 
 @Public()
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService, private readonly configService: ConfigService) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly configService: ConfigService,
+        private readonly httpService: HttpService,
+    ) {}
 
     @UseInterceptors(ClassSerializerInterceptor)
     @Post('register')
@@ -73,35 +82,6 @@ export class AuthController {
         this.setRefreshTokenToCookies(tokens, res);
     }
 
-    @UseGuards(GoogleAuthGuard)
-    @Get('google')
-    googleAuth(@Req() req: Request) {
-        // return req;
-    }
-
-    @UseGuards(GoogleAuthGuard)
-    @Get('google/callback')
-    googleAuthCallback(@Req() req: Request, @Res() res: Response) {
-        res.redirect(`http://localhost:3000/api/auth/success?token=${req.user['accessToken']}`);
-    }
-
-    @UseGuards(YandexAuthGuard)
-    @Get('yandex')
-    yandexAuth(@Req() req: Request) {
-        // return req;
-    }
-
-    @UseGuards(YandexAuthGuard)
-    @Get('yandex/callback')
-    yandexAuthCallback(@Req() req: Request, @Res() res: Response) {
-        res.redirect(`http://localhost:3000/api/auth/success?token=${req.user['accessToken']}`);
-    }
-
-    @Get('success')
-    success() {
-        return { success: true };
-    }
-
     private setRefreshTokenToCookies(tokens: Tokens, res: Response) {
         if (!tokens) {
             throw new UnauthorizedException();
@@ -114,5 +94,51 @@ export class AuthController {
             path: '/',
         });
         res.status(HttpStatus.CREATED).json({ accessToken: tokens.accessToken });
+    }
+
+    @UseGuards(GoogleGuard)
+    @Get('google')
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    googleAuth() {}
+
+    @UseGuards(GoogleGuard)
+    @Get('google/callback')
+    googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+        const token = req.user['accessToken'];
+        return res.redirect(`http://localhost:3000/api/auth/success-google?token=${token}`);
+    }
+
+    @Get('success-google')
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    successGoogle(@Query('token') token: string, @UserAgent() agent: string, @Res() res: Response) {
+        return this.httpService.get(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`).pipe(
+            mergeMap(({ data: { email } }) => this.authService.providerAuth(email, agent, Provider.GOOGLE)),
+            map((data) => this.setRefreshTokenToCookies(data, res)),
+            handleTimeoutAndErrors(),
+        );
+    }
+
+    @UseGuards(YandexGuard)
+    @Get('yandex')
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    yandexAuth() {}
+
+    @UseGuards(YandexGuard)
+    @Get('yandex/callback')
+    yandexAuthCallback(@Req() req: Request, @Res() res: Response) {
+        const token = req.user['accessToken'];
+        return res.redirect(`http://localhost:3000/api/auth/success-yandex?token=${token}`);
+    }
+
+    @Get('success-yandex')
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    successYandex(@Query('token') token: string, @UserAgent() agent: string, @Res() res: Response) {
+        return this.httpService.get(`https://login.yandex.ru/info?format=json&oauth_token=${token}`).pipe(
+            mergeMap(({ data: { default_email } }) =>
+                this.authService.providerAuth(default_email, agent, Provider.YANDEX),
+            ),
+            map((data) => this.setRefreshTokenToCookies(data, res)),
+            handleTimeoutAndErrors(),
+        );
     }
 }
