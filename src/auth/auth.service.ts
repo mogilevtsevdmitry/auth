@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     ConflictException,
     HttpException,
     HttpStatus,
@@ -27,12 +26,8 @@ export class AuthService {
     ) {}
 
     async refreshTokens(refreshToken: string, agent: string): Promise<Tokens> {
-        const token = await this.prismaService.token.findUnique({ where: { token: refreshToken } });
-        if (!token) {
-            throw new UnauthorizedException();
-        }
-        await this.prismaService.token.delete({ where: { token: refreshToken } });
-        if (new Date(token.exp) < new Date()) {
+        const token = await this.prismaService.token.delete({ where: { token: refreshToken } });
+        if (!token || new Date(token.exp) < new Date()) {
             throw new UnauthorizedException();
         }
         const user = await this.userService.findOne(token.userId);
@@ -83,7 +78,7 @@ export class AuthService {
                 userAgent: agent,
             },
         });
-        const token = _token?.token ?? '';
+        const token = _token?.token ?? null;
         return this.prismaService.token.upsert({
             where: { token },
             update: {
