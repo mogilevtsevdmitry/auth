@@ -30,7 +30,7 @@
     "@nestjs/jwt": "^10.0.3",
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
-    "@prisma/client": "^4.15.0",
+    "@prisma/client": "^4.16.2",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
     "cache-manager": "^5.2.2",
