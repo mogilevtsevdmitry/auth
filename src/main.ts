@@ -6,6 +6,7 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.use(cookieParser());
     app.setGlobalPrefix('api');
+    app.useGlobalInterceptors();
     await app.listen(3000);
 }
 bootstrap();
