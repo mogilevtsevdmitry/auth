@@ -27,7 +27,7 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.3",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/jwt": "^10.0.3",
+    "@nestjs/jwt": "^10.1.0",
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
     "@prisma/client": "^4.15.0",
