@@ -31,7 +31,7 @@
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^10.4.2",
     "@prisma/client": "^4.15.0",
-    "axios": "^1.4.0",
+    "axios": "^1.8.2",
     "bcrypt": "^5.1.0",
     "cache-manager": "^5.2.2",
     "class-transformer": "^0.5.1",
