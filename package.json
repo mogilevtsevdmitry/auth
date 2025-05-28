@@ -45,7 +45,7 @@
     "passport-yandex": "^0.0.5",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
-    "ua-parser-js": "^1.0.35",
+    "ua-parser-js": "^1.0.40",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
